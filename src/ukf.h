@@ -8,10 +8,10 @@ class UKF {
  
  private:
   /**
-   * Generates the augmented sigma points
+   * Generates the augmented sigma points for process model
    * @param generated_augmented_sigma_points Are the generated points
    * */
-  void GenerateAugSigmaPoints(MatrixXd &generated_augmented_sigma_points);
+  void GenerateAugSigmaPoints();
 
   /**
    * Predicts sigma points
@@ -19,7 +19,7 @@ class UKF {
    * @param generatedSigmaPoints The generated sigma points using unscented 
    * transformation with augmentation approach
    */
-  void Prediction(MatrixXd &generatedSigmaPoints, double delta_t);
+  void _Prediction(Eigen::MatrixXd &generatedSigmaPoints, double delta_t);
 
   /**
    * Predicts the state, and the state covariance
@@ -27,20 +27,28 @@ class UKF {
    * @param x_out Predicted state mean
    * @param P_out Predicted state covariance matrix
    */
-  void PredictMeanAndCovariance(VectorXd &x_out, MatrixXd &P_out);
+  void PredictMeanAndCovariance(Eigen::VectorXd &x_out, Eigen::MatrixXd &P_out);
 
   /**
    * Transforms the predicted distribution into the measurment space of lidar 
-   * @param meas_package The measurement at k+1
+   * @param 
    */
-  void PredictLidarMeasurement(MeasurementPackage meas_package);
+  void PredictLidarMeasurement(Eigen::VectorXd &z_out, Eigen::MatrixXd &S_out);
 
   /**
    * Transforms the predicted distribution into the measurment space of radar
-   * @param meas_package The measurement at k+1
+   * @param 
    */
-  void PredictRadarMeasurement(MeasurementPackage meas_package);
- 
+  void PredictRadarMeasurement(Eigen::VectorXd &z_out, Eigen::MatrixXd &S_out);
+  
+   /**
+   * Updates the state   
+   * @param 
+   */
+  void UpdateState(MeasurementPackage &meas_package,const Eigen::VectorXd &xk_p,const  Eigen::MatrixXd &Pk_p,
+                   const  Eigen::VectorXd &z_pred,const  Eigen::MatrixXd &S_pred, const int n_z);
+
+
  public:
   /**
    * Constructor
@@ -58,6 +66,8 @@ class UKF {
    */
   void ProcessMeasurement(MeasurementPackage meas_package);
 
+  void Prediction(double delta_t);
+
   // initially set to false, set to true in first call of ProcessMeasurement
   bool is_initialized_;
 
@@ -73,8 +83,14 @@ class UKF {
   // state covariance matrix
   Eigen::MatrixXd P_;
 
+  // Generate sigma points
+  Eigen::MatrixXd generatedSigmaPoints;
+
   // predicted sigma points matrix
   Eigen::MatrixXd Xsig_pred_;
+
+  // predicted sigma points matrix in measurement space
+  Eigen::MatrixXd Zsig_;
 
   // time when the state is true, in us
   long long time_us_;
@@ -104,12 +120,12 @@ class UKF {
   Eigen::VectorXd weights_;
 
   // State dimension
-  const int n_x_ = 5;
+  int n_x_ = 5;
 
   // Augmented state dimension
-  const int n_aug_ = 7;
+  int n_aug_ = 7;
 
-  const int n_sigma_ = 2*n_aug_ + 1;
+  int n_sigma_ = 2*n_aug_ + 1;
 
   // Sigma point spreading parameter
   double lambda_;
