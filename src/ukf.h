@@ -5,6 +5,42 @@
 #include "measurement_package.h"
 
 class UKF {
+ 
+ private:
+  /**
+   * Generates the augmented sigma points
+   * @param generated_augmented_sigma_points Are the generated points
+   * */
+  void GenerateAugSigmaPoints(MatrixXd &generated_augmented_sigma_points);
+
+  /**
+   * Predicts sigma points
+   * @param delta_t Time between k and k+1 in s
+   * @param generatedSigmaPoints The generated sigma points using unscented 
+   * transformation with augmentation approach
+   */
+  void Prediction(MatrixXd &generatedSigmaPoints, double delta_t);
+
+  /**
+   * Predicts the state, and the state covariance
+   * matrix
+   * @param x_out Predicted state mean
+   * @param P_out Predicted state covariance matrix
+   */
+  void PredictMeanAndCovariance(VectorXd &x_out, MatrixXd &P_out);
+
+  /**
+   * Transforms the predicted distribution into the measurment space of lidar 
+   * @param meas_package The measurement at k+1
+   */
+  void PredictLidarMeasurement(MeasurementPackage meas_package);
+
+  /**
+   * Transforms the predicted distribution into the measurment space of radar
+   * @param meas_package The measurement at k+1
+   */
+  void PredictRadarMeasurement(MeasurementPackage meas_package);
+ 
  public:
   /**
    * Constructor
@@ -21,26 +57,6 @@ class UKF {
    * @param meas_package The latest measurement data of either radar or laser
    */
   void ProcessMeasurement(MeasurementPackage meas_package);
-
-  /**
-   * Prediction Predicts sigma points, the state, and the state covariance
-   * matrix
-   * @param delta_t Time between k and k+1 in s
-   */
-  void Prediction(double delta_t);
-
-  /**
-   * Updates the state and the state covariance matrix using a laser measurement
-   * @param meas_package The measurement at k+1
-   */
-  void UpdateLidar(MeasurementPackage meas_package);
-
-  /**
-   * Updates the state and the state covariance matrix using a radar measurement
-   * @param meas_package The measurement at k+1
-   */
-  void UpdateRadar(MeasurementPackage meas_package);
-
 
   // initially set to false, set to true in first call of ProcessMeasurement
   bool is_initialized_;
@@ -88,10 +104,12 @@ class UKF {
   Eigen::VectorXd weights_;
 
   // State dimension
-  int n_x_;
+  const int n_x_ = 5;
 
   // Augmented state dimension
-  int n_aug_;
+  const int n_aug_ = 7;
+
+  const int n_sigma_ = 2*n_aug_ + 1;
 
   // Sigma point spreading parameter
   double lambda_;
