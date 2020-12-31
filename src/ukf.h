@@ -3,6 +3,7 @@
 
 #include "Eigen/Dense"
 #include "measurement_package.h"
+#include <iostream>
 
 class UKF {
  
@@ -19,7 +20,7 @@ class UKF {
    * @param generatedSigmaPoints The generated sigma points using unscented 
    * transformation with augmentation approach
    */
-  void _Prediction(Eigen::MatrixXd &generatedSigmaPoints, double delta_t);
+  void _Prediction(double delta_t);
 
   /**
    * Predicts the state, and the state covariance
@@ -45,8 +46,8 @@ class UKF {
    * Updates the state   
    * @param 
    */
-  void UpdateState(MeasurementPackage &meas_package,const Eigen::VectorXd &xk_p,const  Eigen::MatrixXd &Pk_p,
-                   const  Eigen::VectorXd &z_pred,const  Eigen::MatrixXd &S_pred, const int n_z);
+  void UpdateState(MeasurementPackage &meas_package, const  Eigen::VectorXd &z_pred,
+                   const Eigen::MatrixXd &S_pred, const int n_z);
 
 
  public:
@@ -120,12 +121,12 @@ class UKF {
   Eigen::VectorXd weights_;
 
   // State dimension
-  int n_x_ = 5;
+  int n_x_;
 
   // Augmented state dimension
-  int n_aug_ = 7;
+  int n_aug_;
 
-  int n_sigma_ = 2*n_aug_ + 1;
+  int n_sigma_;
 
   // Sigma point spreading parameter
   double lambda_;
